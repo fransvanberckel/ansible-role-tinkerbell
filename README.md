@@ -39,6 +39,7 @@ I am open for cloud instances to test, when they become available. I used the An
 
 First, before you start running, you need to make adjustments to, where needed ...
 
+- playbooks/tinkerbell/inventory.ini
 - playbooks/tinkerbell/group_vars/all/all.yml
 - playbooks/tinkerbell/group_vars/all/apt.yml
 - playbooks/tinkerbell/group_vars/all/secrets.yml
