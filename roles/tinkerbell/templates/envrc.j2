@@ -1,0 +1,35 @@
+# Network interface for Tinkerbell's network
+export TINKERBELL_NETWORK_INTERFACE={{ ansible_default_ipv4.interface }}
+
+# Decide on a subnet for provisioning. Tinkerbell should "own" this
+# network space. Its subnet should be just large enough to be able
+# to provision your hardware.
+export TINKERBELL_CIDR={{ network_cidr }}
+
+# Host IP is used by provisioner to expose different services such as
+# tink, boots, etc.
+#
+# The host IP should the first IP in the range, and the Nginx IP
+# should be the second address.
+export TINKERBELL_HOST_IP={{ host_ip }}
+
+# NGINX IP is used by provisioner to serve files required for iPXE boot
+export TINKERBELL_NGINX_IP={{ nginx_ip }}
+
+# Tinkerbell Tink username and password
+export TINKERBELL_TINK_USERNAME={{ server_username  }}
+export TINKERBELL_TINK_PASSWORD={{ server_password }}
+
+# Docker Registry's username and password
+export TINKERBELL_REGISTRY_USERNAME={{ registry_username  }}
+export TINKERBELL_REGISTRY_PASSWORD={{ registry_password  }}
+
+# Legacy options, to be deleted:
+export FACILITY={{ facility_code }}
+export ROLLBAR_TOKEN=ignored
+export ROLLBAR_DISABLE=1
+
+export TB_OSIE_TAR={{ downloads_dir }}/{{ osie_tar }}
+export STATEDIR={{ state_dir }}
+
+echo -e "\n$(docker ps)\n\nBeware ... this setup was done by Ansible\n"

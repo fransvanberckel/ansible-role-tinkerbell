@@ -1,0 +1,32 @@
+---
+apt_archive_types:
+  - deb
+  - deb-src
+
+apt_debian_repository: 'http://deb.debian.org'
+apt_ubuntu_repository: 'http://archive.ubuntu.com'
+
+apt_enable_updates: true
+apt_enable_security: true
+apt_enable_proposed: true
+apt_enable_backports: true
+
+apt_packages:
+  # required by devops team
+  required:
+    - 'cron-apt'
+    - 'curl'
+    - 'htop'
+    - 'iftop'
+    - 'iotop'
+    - 'locales'
+    - 'lsof'
+    - 'net-tools'
+    - 'nmap'
+    - 'rsync'
+    - 'tcpdump'
+    - 'tree'
+    - 'unzip'
+    - 'wget'
+  # packages to purge
+  absent:

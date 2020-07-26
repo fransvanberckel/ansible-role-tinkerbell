@@ -1,0 +1,20 @@
+---
+- name: install packages required by ansible
+  raw: apt -y --no-install-recommends install sudo python3-pip python3-apt aptitude lsb-release
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: set sudoers nopasswd for {{ ansible_user_id }}
+  lineinfile:
+    path: /etc/sudoers
+    regexp: ^{{ ansible_user_id }}
+    line: "{{ ansible_user_id }}   ALL=(ALL) NOPASSWD:ALL"
+    state: present
+    validate: '/usr/sbin/visudo -cf %s'
+  become: yes
+
+- name: copy public ssh-key
+  authorized_key:
+    user: "{{ ansible_user_id }}"
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"

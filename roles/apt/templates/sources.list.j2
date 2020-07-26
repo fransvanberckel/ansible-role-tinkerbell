@@ -1,0 +1,29 @@
+{{ ansible_managed | comment }}
+{% if ansible_distribution == "Debian" %}
+{% for item in apt_archive_types %}
+{{ item }} {{ apt_debian_repository }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} main contrib non-free
+{%     if apt_enable_updates %}
+{{ item }} {{ apt_debian_repository }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }}-updates main contrib non-free
+{%     endif %}
+{%     if apt_enable_backports %}
+{{ item }} {{ apt_debian_repository }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }}-backports main contrib non-free
+{%     endif %}
+{%     if apt_enable_security %}
+{{ item }} {{ apt_debian_repository }}/{{ ansible_distribution|lower }}-security {{ ansible_distribution_release }}-security main contrib non-free
+{%     endif %}
+{% endfor %}
+{% endif %}
+{% if ansible_distribution == "Ubuntu" %}
+{% for item in apt_archive_types %}
+{{ item }} {{ apt_ubuntu_repository }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} main restricted universe multiverse
+{%     if apt_enable_updates %}
+{{ item }} {{ apt_ubuntu_repository }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }}-updates main restricted universe multiverse
+{%     endif %}
+{%     if apt_enable_backports %}
+{{ item }} {{ apt_ubuntu_repository }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }}-backports main restricted universe multiverse
+{%     endif %}
+{%     if apt_enable_security %}
+{{ item }} {{ apt_ubuntu_repository }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }}-security main restricted universe multiverse
+{%     endif %}
+{% endfor %}
+{% endif %}

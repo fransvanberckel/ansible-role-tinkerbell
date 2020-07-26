@@ -1,0 +1,157 @@
+---
+- name: be sure all dependencies are present
+  apt:
+    name:
+      - 'jq'
+      - 'pass'
+      - 'gnupg2'
+      - 'git'
+      - 'docker.io'
+      - 'docker-compose'
+    state: present
+    update_cache: yes
+    install_recommends: no
+
+- name: create directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+  with_items: "{{ create_directories }}"
+
+- name: git clone tink project repo
+  git:
+    repo: '{{ tink_repo }}'
+    dest: '{{ tink_dir }}'
+    version: 'master'
+    force: yes
+
+# it is not necessary for setup, but having the information
+- name: generate envrc with settings used by ansible
+  template:
+    src: envrc.j2
+    dest: '{{ tink_dir }}/envrc'
+    mode: '0400'
+
+- name: move some tink files around
+  copy:
+    remote_src: True
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+  with_items: '{{ move_files }}'
+
+- name: check osie current directory exists, if not call block
+  stat:
+    path: '{{ osie_current_dir }}'
+  register: osie_current
+- block:
+  - name: download osie {{ osie_tar }}
+    get_url:
+      url: '{{ osie_url }}'
+      dest: '{{ downloads_dir }}/{{ osie_tar }}'
+  - name: extract osie {{ osie_tar }}
+    unarchive:
+      src: '{{ downloads_dir }}/{{ osie_tar }}'
+      dest: '{{ osie_base_dir }}'
+      remote_src: yes
+  - name: rename osie tarball directory and move workflow-helper
+    shell: |
+      for directory in osie*
+      do
+        if [ -d "$directory" ]
+        then
+          mv "${directory}" current
+          cp current/workflow-helper* '{{ workflow_dir }}'
+        fi
+      done
+    args:
+      executable: /bin/bash
+      chdir: '{{ osie_base_dir }}'
+  when: not osie_current.stat.exists
+
+- name: generate certificates
+  shell: |
+    if [ ! -f 'ca.json' ]; then
+      jq '.names[0].L = "{{ facility_code }}"' \
+      "{{ deploy_dir }}/tls/ca.in.json" \
+      --arg ip "{{ host_ip }}" \
+      --arg facility "{{ facility_code }}" \
+      > ca.json
+    fi
+    if [ ! -f 'server-csr.json' ]; then
+      jq '.hosts += [ $ip, "tinkerbell.{{ facility_code }}.packet.net" ]
+      | .names[0].L = "{{ facility_code }}"
+      | .hosts = (.hosts | sort | unique)' \
+      "{{ deploy_dir }}/tls/server-csr.in.json" \
+      --arg ip "{{ host_ip }}" \
+      --arg facility "{{ facility_code }}" \
+      > server-csr.json
+    fi
+  args:
+    executable: /bin/bash
+    chdir: '{{ state_dir }}/certs'
+
+- name: docker build tinkerbell-certs
+  docker_image:
+    name: tinkerbell-certs
+    tag: tinkerbell-certs
+    build:
+      path: '{{ deploy_dir }}/tls'
+      pull: yes
+    source: build
+
+- name: docker run tinkerbell-certs
+  docker_container:
+    name: tinkerbell-certs
+    image: tinkerbell-certs:tinkerbell-certs
+    user: '0:0'
+    cleanup: yes
+    volumes:
+    - '{{ state_dir }}/certs:/certs'
+
+- name: wait until ca.pem is present and continuing
+  wait_for:
+    path: '{{ state_dir }}/certs/ca.pem'
+    delay: 5
+
+- name: compare certificates
+  shell: |
+    if ! cmp --quiet 'ca.pem' '{{ workflow_dir }}/ca.pem'; then
+      cp ca.pem '{{ workflow_dir }}/ca.pem'
+    fi
+    if ! cmp --quiet 'ca.pem' '{{ certs_d_dir }}/tinkerbell.crt'; then
+      cp ca.pem '{{ certs_d_dir }}/tinkerbell.crt'
+    fi
+  args:
+    executable: /bin/bash
+    chdir: '{{ state_dir }}/certs'
+
+- name: create docker compose by ansible
+  template:
+    src: docker-compose.yml.j2
+    dest: '{{ deploy_dir }}/docker-compose.yml'
+
+- name: deploy docker containers with compose
+  docker_compose:
+    project_src: '{{ deploy_dir }}'
+    build: yes
+
+- name: waits for '{{ host_ip }}' port '443'
+  wait_for:
+    host: '{{ host_ip }}'
+    port: 443
+    delay: 5
+    state: drained
+
+- name: log into docker registry
+  docker_login:
+    registry: '{{ host_ip }}'
+    username: '{{ registry_username }}'
+    password: '{{ registry_password }}'
+    reauthorize: yes
+
+- name: push tink-worker to registry now
+  docker_image:
+    name: 'quay.io/tinkerbell/tink-worker:latest'
+    repository: '{{ host_ip }}/tink-worker:latest'
+    push: yes
+    source: pull

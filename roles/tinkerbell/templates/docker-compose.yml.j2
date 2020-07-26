@@ -1,0 +1,156 @@
+{{ ansible_managed | comment }}
+version: "2.1"
+services:
+  tink-server:
+    image: quay.io/tinkerbell/tink:latest
+    restart: unless-stopped
+    environment:
+      FACILITY: {{ facility_code }}
+      PACKET_ENV: testing
+      PACKET_VERSION: ignored
+      ROLLBAR_TOKEN: ignored
+      ROLLBAR_DISABLE: 1
+      PGUSER: {{ postgres_username }}
+      PGPASSWORD: {{ postgres_password }}
+      PGDATABASE: {{ postgres_db }}
+      PGHOST: db
+      PGPORT: 5432
+      PGSSLMODE: disable
+      TINKERBELL_GRPC_AUTHORITY: :42113
+      TINKERBELL_HTTP_AUTHORITY: :42114
+      AUTH_USERNAME: {{ server_username }}
+      AUTH_PASSWORD: {{ server_password }}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- 127.0.0.1:42114/cert"] # port needs to match TINKERBELL_HTTP_AUTHORITY
+      interval: 5s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - {{ state_dir }}/certs:/certs/{{ facility_code }}
+    ports:
+      - 42113:42113/tcp
+      - 42114:42114/tcp
+
+  db:
+    image: postgres:10-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: {{ postgres_username }}
+      POSTGRES_PASSWORD: {{ postgres_password }}
+      POSTGRES_DB: {{ postgres_db }}
+    volumes:
+      - {{ state_dir }}/db/tinkerbell-init.sql:/docker-entrypoint-initdb.d/tinkerbell-init.sql:ro
+      - postgres_data:/var/lib/postgresql/data:rw
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tinkerbell"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+
+  tink-cli:
+    image: quay.io/tinkerbell/tink-cli:latest
+    restart: unless-stopped
+    environment:
+      TINKERBELL_GRPC_AUTHORITY: 127.0.0.1:42113
+      TINKERBELL_CERT_URL: http://127.0.0.1:42114/cert
+    depends_on:
+      tink-server:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    network_mode: host
+
+  registry:
+    build:
+      context: registry
+      args:
+        REGISTRY_USERNAME: '{{ registry_username }}'
+        REGISTRY_PASSWORD: '{{ registry_password }}'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl --cacert /certs/ca.pem https://127.0.0.1"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    environment:
+      REGISTRY_HTTP_ADDR: 0.0.0.0:443
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/server.pem
+      REGISTRY_HTTP_TLS_KEY: /certs/server-key.pem
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+    volumes:
+    - {{ state_dir }}/certs:/certs
+    - {{ registry_dir }}:/var/lib/registry
+    network_mode: host
+
+  boots:
+    image: quay.io/tinkerbell/boots:latest
+    restart: unless-stopped
+    network_mode: host
+    command: -dhcp-addr 0.0.0.0:67 -tftp-addr {{ host_ip }}:69 -http-addr {{ host_ip }}:80 -log-level DEBUG
+    environment:
+      API_AUTH_TOKEN: ignored
+      API_CONSUMER_TOKEN: ignored
+      FACILITY_CODE: {{ facility_code }}
+      PACKET_ENV: testing
+      PACKET_VERSION: ignored
+      ROLLBAR_TOKEN: ignored
+      ROLLBAR_DISABLE: 1
+      MIRROR_HOST: {{ nginx_ip }}
+      DNS_SERVERS: 8.8.8.8
+      PUBLIC_IP: {{ host_ip }}
+      BOOTP_BIND: {{ host_ip }}:67
+      HTTP_BIND: {{ host_ip }}:80
+      SYSLOG_BIND: {{ host_ip }}:514
+      TFTP_BIND: {{ host_ip }}:69
+      DOCKER_REGISTRY: {{ host_ip }}
+      REGISTRY_USERNAME: {{ registry_username }}
+      REGISTRY_PASSWORD: {{ registry_password }}
+      TINKERBELL_GRPC_AUTHORITY: {{ host_ip }}:42113
+      TINKERBELL_CERT_URL: http://{{ host_ip }}:42114/cert
+      ELASTIC_SEARCH_URL: {{ host_ip }}:9200
+      DATA_MODEL_VERSION: 1
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - {{ host_ip }}:80:80/tcp
+      - 67:67/udp
+      - 69:69/udp
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    tty: true
+    ports:
+      - {{ nginx_ip }}:80:80/tcp
+    volumes:
+      - {{state_dir}}/webroot:/usr/share/nginx/html/
+
+  hegel:
+    image: quay.io/tinkerbell/hegel:latest
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      ROLLBAR_TOKEN: ignored
+      ROLLBAR_DISABLE: 1
+      PACKET_ENV: testing
+      PACKET_VERSION: ignored
+      GRPC_PORT: 42115
+      HEGEL_FACILITY: {{ facility_code }}'
+      HEGEL_USE_TLS: 0
+      TINKERBELL_GRPC_AUTHORITY: 127.0.0.1:42113
+      TINKERBELL_CERT_URL: http://127.0.0.1:42114/cert
+      DATA_MODEL_VERSION: 1
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

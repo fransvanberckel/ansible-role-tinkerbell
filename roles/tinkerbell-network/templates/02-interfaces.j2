@@ -1,0 +1,9 @@
+auto {{ tinkerbell_network.interface }}:0
+iface {{ tinkerbell_network.interface }}:0 inet static
+      address {{ host_ip }}/{{ network_cidr }}
+      pre-up sleep 4
+
+auto {{ tinkerbell_network.interface }}:1
+iface {{ tinkerbell_network.interface }}:1 inet static
+      address {{ nginx_ip }}/{{ network_cidr }}
+      pre-up sleep 4

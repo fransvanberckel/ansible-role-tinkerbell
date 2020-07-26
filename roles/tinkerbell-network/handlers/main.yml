@@ -1,0 +1,21 @@
+---
+- name: generating netplan configuration
+  command: netplan generate
+  listen: netplan generate config
+  notify: netplan apply config
+
+- name: applying netplan configuration
+  command: netplan apply && sleep 3
+  listen: netplan apply config
+  notify: set ip link
+
+- name: ifup interfaces
+  command: ifup --allow auto \
+    '{{ tinkerbell_network.interface }}:0' \
+    '{{ tinkerbell_network.interface }}:1'
+  listen: ifup interfaces
+  notify: set ip link
+
+- name: ip link set nomaster
+  command: ip link set {{ tinkerbell_network.interface }} nomaster
+  listen: set ip link

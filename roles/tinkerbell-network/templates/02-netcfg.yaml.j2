@@ -1,0 +1,9 @@
+network:
+  version: {{ tinkerbell_network ['version']|default('2') }}
+  renderer: {{ tinkerbell_network ['renderer'] }}
+{% if tinkerbell_network ['interface'] is defined %}
+  ethernets:
+{{ tinkerbell_network ['interface']|indent(4, true) }}:
+      addresses:
+{{ tinkerbell_network ['ips']|to_nice_yaml|indent(8, true) }}
+{% endif %}

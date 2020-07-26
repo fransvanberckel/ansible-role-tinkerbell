@@ -1,0 +1,24 @@
+---
+- hosts: 'all'
+  gather_facts: yes
+  become_method: su
+  roles:
+    - { role: bootstrap, when: ansible_os_family == "Debian" }
+
+- hosts: 'all'
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: apt, when: ansible_os_family == "Debian" }
+
+- hosts: 'provisioner'
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: tinkerbell-network, when: ansible_os_family == "Debian" }
+
+- hosts: 'provisioner'
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: tinkerbell, when: ansible_os_family == "Debian" }

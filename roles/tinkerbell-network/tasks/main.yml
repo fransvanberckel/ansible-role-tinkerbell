@@ -1,0 +1,22 @@
+---
+- sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: configuring provisioner network by netplan
+  template:
+    src: 02-netcfg.yaml.j2
+    dest: '/etc/netplan/{{ tinkerbell_network.interface }}.yaml'
+  notify: netplan generate config
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version >= '17.10'
+
+- name: configuring provisioner network by interfaces
+  template:
+    src: 02-interfaces.j2
+    dest: '/etc/network/interfaces.d/{{ tinkerbell_network.interface }}'
+  notify: ifup interfaces
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version <= '17.04' or
+        ansible_distribution == 'Debian'

@@ -1,0 +1,52 @@
+---
+host_ip: 192.168.1.1
+nginx_ip: 192.168.1.2
+network_cidr: '29'
+
+tinkerbell_network:
+  version: 2
+  renderer: networkd
+  interface: '{{ ansible_default_ipv4.interface }}'
+  ips:
+    - '{{ host_ip }}/{{ network_cidr }}'
+    - '{{ nginx_ip }}/{{ network_cidr }}'
+
+server_username: 'admin'
+server_password: 'a9e82996bcb012abf9889e20a1ff8326cab2590f6adf5caa70a40ec6a82c91fd'
+registry_username: 'admin'
+registry_password: 'e9a82996bcb010abf9889e30a1ff8326cab2980f6adf5caa80a40ec6a82c91ad'
+postgres_username: 'tinkerbell'
+postgres_password: 'tinkerbell'
+postgres_db: 'tinkerbell'
+facility_code: 'onprem'
+osie_tar: 'latest.tar.gz'
+
+tink_repo: 'https://github.com/tinkerbell/tink.git'
+osie_url: 'https://tinkerbell-oss.s3.amazonaws.com/osie-uploads/latest.tar.gz'
+
+project_dir: '/var/tinkerbell'
+tink_dir: '{{ project_dir }}/tink'
+downloads_dir: '{{ project_dir }}/downloads'
+deploy_dir: '{{ project_dir }}/deploy'
+state_dir: '{{ project_dir }}/state'
+certs_dir: '{{ state_dir }}/certs'
+certs_d_dir: '/etc/docker/certs.d/{{ host_ip }}'
+registry_dir: '{{ state_dir }}/registry'
+workflow_dir: '{{ state_dir }}/webroot/workflow'
+osie_base_dir: '{{ state_dir }}/webroot/misc/osie'
+osie_current_dir: '{{ osie_base_dir }}/current'
+
+create_directories:
+  - { path: '{{ tink_dir }}' }
+  - { path: '{{ downloads_dir }}' }
+  - { path: '{{ osie_base_dir }}' }
+  - { path: '{{ certs_dir }}' }
+  - { path: '{{ certs_d_dir }}' }
+  - { path: '{{ registry_dir }}' }
+  - { path: '{{ workflow_dir }}' }
+  - { path: '{{ deploy_dir }}' }
+
+move_files:
+  - { src: '{{ tink_dir }}/deploy/registry', dest: '{{ deploy_dir }}' }
+  - { src: '{{ tink_dir }}/deploy/tls', dest: '{{ deploy_dir }}' }
+  - { src: '{{ tink_dir }}/deploy/db', dest: '{{ state_dir }}' }

@@ -1,0 +1,74 @@
+---
+- name:  read lsb-release id
+  shell: lsb_release -rs
+  register: os_release_id
+
+- name:  read lsb-release codename
+  shell: lsb_release -cs
+  register: os_release_codename
+
+- name: patch os-release
+  lineinfile:
+    dest: "{{ item.dest }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+  - { dest: '/etc/os-release', regexp: 'VERSION_ID', line: 'VERSION_ID="{{ os_release_id.stdout }}"' }
+  - { dest: '/etc/os-release', regexp: 'VERSION_CODENAME', line: 'VERSION_CODENAME="{{ os_release_codename.stdout }}"' }
+  when: ansible_distribution == 'Debian'
+
+- name: set suggests / recommends to no
+  lineinfile:
+    dest: "{{ item.dest }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    create: yes
+  with_items:
+  - { dest: '/etc/apt/apt.conf.d/99local', regexp: 'APT::Install-Suggests', line: 'APT::Install-Suggests "0";' }
+  - { dest: '/etc/apt/apt.conf.d/99local', regexp: 'APT::Install-Recommends', line: 'APT::Install-Recommends "0";' }
+
+- name: updating sources.list
+  template:
+    src: sources.list.j2
+    dest: /etc/apt/sources.list
+
+- name: purge packages that are no longer needed
+  apt:
+    name: '{{ apt_packages.absent }}'
+    state: absent
+
+- name: remove dependencies that are no longer needed
+  apt:
+    autoremove: yes
+
+- name: upgrade dist packages
+  apt:
+    upgrade: dist
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: install packages required by devops team
+  apt:
+    name: '{{ apt_packages.required }}'
+    state: present
+
+- name: remove useless packages from the cache
+  apt:
+    autoclean: yes
+
+- name: ensure the old cron-apt file is absent
+  file:
+    path: /etc/cron.d/cron-apt
+    state: absent
+
+- name: schedule cron-apt job at 13.00 hour
+  cron:
+    name: cron-apt
+    minute: "0"
+    hour: "13"
+    job: "test -x /usr/sbin/cron-apt && /usr-sbin/cron-apt"
+    user: root
+    cron_file: cron-apt
+    state: present
