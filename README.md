@@ -46,9 +46,11 @@ First, before you start running, you need to make adjustments to, where needed .
 
 And make shure, the use of '{{ ansible_default_ipv4.interface }}' works for you.
 
+```
 $ cd playbooks/tinkerbell/
 $ ./runner.sh
 
+```
 > Important note: Downloading osie latest.tar.gz takes some time.
 
 ## Author
