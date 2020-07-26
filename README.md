@@ -30,7 +30,7 @@ tinkerbell : log into docker registry -- 0.90s
 
 This configuration has been tested with the following hardware and OS combinations:
 
-  - HP ProBook 6560b and Ubuntu 18.04 (64-bit)
+  - HP ProBook 6560b and Ubuntu 18.04 (64-bit), used docker-compose_1.21.0-3_all.deb
   - HP ProLiant DL2000 Node Rack Server module and Debian Bullseye (64-bit)
 
 I am open for cloud instances to test, when they become available. I used the Ansible anstomlog callback plugin for a clair output. Check ansible.cfg includded for details. Oo, and i encrypted my own secrets.yml details, just to be sure.
