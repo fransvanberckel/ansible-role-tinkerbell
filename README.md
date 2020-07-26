@@ -44,7 +44,7 @@ First, before you start running, you need to make adjustments to, where needed .
 - playbooks/tinkerbell/group_vars/all/secrets.yml
 - playbooks/tinkerbell/group_vars/provisioner/tinkerbell.yml
 
-And make shure, the use of '{{ ansible_default_ipv4.interface }}' works for you.
+And know for sure, the use of '{{ ansible_default_ipv4.interface }}' works for you.
 
 ```
 $ cd playbooks/tinkerbell/
