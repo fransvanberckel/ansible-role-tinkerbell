@@ -1,7 +1,0 @@
----
-ansible_user:
-ansible_ssh_pass:
-ansible_become_pass:
-
-include_vars:
-  - secrets.yml
