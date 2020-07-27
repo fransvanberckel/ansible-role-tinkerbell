@@ -5,13 +5,12 @@ generate_password() (
 )
 
 generate_secrets() (
-        local tink_password
+        local set_server_password
         set_server_password=$(generate_password)
-        local registry_password
+        local set_registry_password
         set_registry_password=$(generate_password)
-        local registry_password
+        local set_postgres_password
         set_postgres_password=$(generate_password)
-        local postgres_password
         cat > $HOME/.ansible/.secrets.yml <<EOF
 ansible_user: ''
 ansible_ssh_pass: ''
