@@ -4,7 +4,7 @@ generate_password() (
         head -c 12 /dev/urandom | sha256sum | cut -d' ' -f1
 )
 
-generate_secrets() (
+create_secrets() (
         local set_server_password
         set_server_password=$(generate_password)
         local set_registry_password
@@ -29,7 +29,7 @@ if [ ! -f $HOME/.ansible/.vaultpass ];then
 fi
 
 if [ ! -f $HOME/.ansible/.secrets.yml ]; then
-        generate_secrets
+        create_secrets
         ansible-vault encrypt $HOME/.ansible/.secrets.yml
 fi
 
