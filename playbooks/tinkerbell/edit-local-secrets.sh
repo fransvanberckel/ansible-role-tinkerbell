@@ -24,7 +24,7 @@ postgres_password: ${set_postgres_password}
 EOF
 )
 
-if [ ! -f $HOME/.ansible/.vaultpass2 ];then
+if [ ! -f $HOME/.ansible/.vaultpass ];then
         generate_password > $HOME/.ansible/.vaultpass
 fi
 
