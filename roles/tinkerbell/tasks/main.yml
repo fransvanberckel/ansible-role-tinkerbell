@@ -12,6 +12,12 @@
     update_cache: yes
     install_recommends: no
 
+- name: Ensure docker deamon is enabled & running
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
 - name: create directories
   file:
     path: "{{ item.path }}"
