@@ -1,5 +1,5 @@
 ---
-- name: be sure all dependencies are present
+- name: ensure all dependencies are present
   apt:
     name:
       - 'jq'
@@ -12,7 +12,7 @@
     update_cache: yes
     install_recommends: no
 
-- name: Ensure docker deamon is enabled & running
+- name: ensure docker deamon is enabled & running
   service:
     name: docker
     state: started
