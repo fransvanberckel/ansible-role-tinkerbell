@@ -52,6 +52,10 @@ $ ./runner.sh
 ```
 > Important note: Downloading osie latest.tar.gz takes some time.
 
+## Next
+
+There are workflow writen for [Debian](https://github.com/fransvanberckel/debian-workflow) and [Ubuntu](https://github.com/fransvanberckel/ubuntu-workflow).
+
 ## Author
 
 The repository was created in 2020 by [Frans van Berckel](https://www.fransvanberckel.nl)
