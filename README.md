@@ -52,9 +52,9 @@ $ ./runner.sh
 ```
 > Important note: Downloading osie latest.tar.gz takes some time.
 
-## Next
+## Notes
 
-There are workflow writen for [Debian](https://github.com/fransvanberckel/debian-workflow) and [Ubuntu](https://github.com/fransvanberckel/ubuntu-workflow).
+There are Tinkerbell workflow's writen for [Debian](https://github.com/fransvanberckel/debian-workflow) and [Ubuntu](https://github.com/fransvanberckel/ubuntu-workflow). All these workflow actions run as --privileged Docker containers.
 
 ## Author
 
