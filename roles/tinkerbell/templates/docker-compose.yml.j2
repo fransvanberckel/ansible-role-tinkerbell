@@ -38,9 +38,9 @@ services:
     image: postgres:10-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: {{ postgres_username }}
-      POSTGRES_PASSWORD: {{ postgres_password }}
       POSTGRES_DB: {{ postgres_db }}
+      POSTGRES_PASSWORD: {{ postgres_password }}
+      POSTGRES_USER: {{ postgres_username }}
     volumes:
       - {{ state_dir }}/db/tinkerbell-init.sql:/docker-entrypoint-initdb.d/tinkerbell-init.sql:ro
       - postgres_data:/var/lib/postgresql/data:rw
