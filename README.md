@@ -50,7 +50,6 @@ $ cd playbooks/tinkerbell/
 $ ./edit-local-secrets.sh
 $ ./runner.sh
 ```
-
 ## Notes
 
 > Important: Downloading osie latest.tar.gz takes some time.

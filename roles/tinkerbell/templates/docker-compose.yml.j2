@@ -10,16 +10,16 @@ services:
       PACKET_VERSION: ignored
       ROLLBAR_TOKEN: ignored
       ROLLBAR_DISABLE: 1
-      PGUSER: {{ postgres_username }}
-      PGPASSWORD: {{ postgres_password }}
       PGDATABASE: {{ postgres_db }}
       PGHOST: db
+      PGPASSWORD: {{ postgres_password }}
       PGPORT: 5432
       PGSSLMODE: disable
+      PGUSER: {{ postgres_username }}
       TINKERBELL_GRPC_AUTHORITY: :42113
       TINKERBELL_HTTP_AUTHORITY: :42114
-      AUTH_USERNAME: {{ server_username }}
-      AUTH_PASSWORD: {{ server_password }}
+      TINK_AUTH_USERNAME: {{ server_username }}
+      TINK_AUTH_PASSWORD: {{ server_password }}
     depends_on:
       db:
         condition: service_healthy
