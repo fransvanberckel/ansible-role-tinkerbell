@@ -6,10 +6,6 @@ services:
     restart: unless-stopped
     environment:
       FACILITY: {{ facility_code }}
-      PACKET_ENV: testing
-      PACKET_VERSION: ignored
-      ROLLBAR_TOKEN: ignored
-      ROLLBAR_DISABLE: 1
       PGDATABASE: {{ postgres_db }}
       PGHOST: db
       PGPASSWORD: {{ postgres_password }}
@@ -98,10 +94,6 @@ services:
       API_AUTH_TOKEN: ignored
       API_CONSUMER_TOKEN: ignored
       FACILITY_CODE: {{ facility_code }}
-      PACKET_ENV: testing
-      PACKET_VERSION: ignored
-      ROLLBAR_TOKEN: ignored
-      ROLLBAR_DISABLE: 1
       MIRROR_HOST: {{ nginx_ip }}
       DNS_SERVERS: 8.8.8.8
       PUBLIC_IP: {{ host_ip }}
@@ -138,10 +130,6 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      ROLLBAR_TOKEN: ignored
-      ROLLBAR_DISABLE: 1
-      PACKET_ENV: testing
-      PACKET_VERSION: ignored
       GRPC_PORT: 42115
       HEGEL_FACILITY: {{ facility_code }}'
       HEGEL_USE_TLS: 0
