@@ -17,6 +17,8 @@ services:
       TINK_AUTH_USERNAME: {{ server_username }}
       TINK_AUTH_PASSWORD: {{ server_password }}
     depends_on:
+      tink-server-migration:
+        condition: service_started
       db:
         condition: service_healthy
     healthcheck:
@@ -29,6 +31,28 @@ services:
     ports:
       - 42113:42113/tcp
       - 42114:42114/tcp
+
+  tink-server-migration:
+    image: quay.io/tinkerbell/tink:latest
+    restart: on-failure
+    environment:
+      ONLY_MIGRATION: "true"
+      FACILITY: {{ facility_code }}
+      PGDATABASE: {{ postgres_db }}
+      PGHOST: db
+      PGPASSWORD: {{ postgres_password }}
+      PGPORT: 5432
+      PGSSLMODE: disable
+      PGUSER: {{ postgres_username }}
+      TINKERBELL_GRPC_AUTHORITY: :42113
+      TINKERBELL_HTTP_AUTHORITY: :42114
+      TINK_AUTH_USERNAME: {{ server_username }}
+      TINK_AUTH_PASSWORD: {{ server_password }}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - {{ state_dir }}/certs:/certs/{{ facility_code }}
 
   db:
     image: postgres:10-alpine
@@ -69,7 +93,7 @@ services:
         REGISTRY_PASSWORD: '{{ registry_password }}'
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl --cacert /certs/ca.pem -fsSL https://127.0.0.1"]
+      test: ["CMD-SHELL", "curl --cacert /certs/ca.pem https://127.0.0.1"]
       interval: 5s
       timeout: 1s
       retries: 5
