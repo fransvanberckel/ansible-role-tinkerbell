@@ -12,6 +12,7 @@ create_secrets() (
         local set_postgres_password
         set_postgres_password=$(generate_password)
         cat > $HOME/.ansible/.secrets.yml <<EOF
+---
 ansible_user: ''
 ansible_ssh_pass: ''
 ansible_become_pass: ''
@@ -24,8 +25,13 @@ postgres_password: ${set_postgres_password}
 EOF
 )
 
-if [ ! -f $HOME/.ansible/.vaultpass ];then
-        generate_password > $HOME/.ansible/.vaultpass
+if ! [ -x "$(command -v ansible-vault)" ]; then
+        echo 'Error: ansible-vault is not installed.' >&2
+        exit 1
+fi
+
+if [ ! -f $HOME/.ansible/.vault_password ];then
+        generate_password > $HOME/.ansible/.vault_password
 fi
 
 if [ ! -f $HOME/.ansible/.secrets.yml ]; then
