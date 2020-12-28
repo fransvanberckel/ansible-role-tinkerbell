@@ -13,8 +13,8 @@ if ! command -v ansible >/dev/null; then
         echo "Installing Ansible & dependencies"
         if command -v sudo >/dev/null; then
                 if command -v apt-get >/dev/null; then
-                sudo apt-get update -qq
-                sudo apt-get install -y -qq openssh-client sshpass ansible
+                        sudo apt-get update -qq
+                        sudo apt-get install -y -qq openssh-client sshpass ansible
                 else
                         echo "apt-get command not found!"
                         exit 1
