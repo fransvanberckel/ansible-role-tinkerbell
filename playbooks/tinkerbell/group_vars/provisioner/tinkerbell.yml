@@ -22,7 +22,7 @@ postgres_db: 'tinkerbell'
 facility_code: 'onprem'
 osie_tar: 'latest.tar.gz'
 
-tink_repo: 'https://github.com/tinkerbell/tink.git'
+tink_repo: 'https://github.com/tinkerbell/sandbox.git'
 osie_url: 'https://tinkerbell-oss.s3.amazonaws.com/osie-uploads/latest.tar.gz'
 
 project_dir: '/var/tinkerbell'
