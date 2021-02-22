@@ -26,7 +26,7 @@ apt : purge packages that are no longer needed -- 1.02s
 tinkerbell : log into docker registry -- 0.90s
 ```
 ## About why and how with Ansible
-Why did you choose? It's because it does server and configuration management, for humans verry well. And how did you? I learned by reading and using it daily. If you wanna understand Ansible yourselfs? I have purchased Ansible for DevOps, by Jeff Geerling. Please checkout the website, for more details ... https://www.ansiblefordevops.com/
+Why did you choose? It's because it does Linux server and configuration management, for humans very well. And how did you? I learned by reading and using it daily. If you wanna understand Ansible yourselfs? I have purchased Ansible for DevOps, by Jeff Geerling. Please checkout the website, for more details ... https://www.ansiblefordevops.com/
 
 ## Compatibility
 
